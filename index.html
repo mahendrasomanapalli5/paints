@@ -1,0 +1,315 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mahendra Paints and General Stores</title>
+<style>
+  :root { --brand:#b3261e; --brand-dark:#8c1d17; --ink:#1f2430; --muted:#6b7280; --bg:#faf7f2; --card:#fff; --line:#e7e1d8; --wa:#25d366; --wa-dark:#1ebe5b; --ok:#1b7f3b; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif; color:var(--ink); background:var(--bg); }
+  [hidden] { display:none !important; }
+  .topbar { position:sticky; top:0; z-index:20; display:flex; align-items:center; justify-content:space-between; gap:12px; padding:10px 16px; background:var(--brand); color:#fff; }
+  .brand { display:flex; align-items:center; gap:10px; min-width:0; }
+  .brand-mark { display:grid; place-items:center; width:36px; height:36px; border-radius:8px; background:#fff; color:var(--brand); font-weight:800; flex:none; }
+  .brand-name { font-weight:700; line-height:1.1; }
+  .brand-name small { display:block; font-weight:500; opacity:.9; font-size:.75rem; }
+  .cart-btn { display:flex; align-items:center; gap:6px; background:rgba(255,255,255,.15); color:#fff; border:0; padding:8px 12px; border-radius:8px; font-size:.95rem; cursor:pointer; }
+  .badge { background:#fff; color:var(--brand); border-radius:999px; padding:0 7px; font-size:.75rem; font-weight:700; }
+  .container { max-width:1100px; margin:0 auto; padding:16px; }
+  .tools { display:grid; gap:12px; margin-bottom:16px; }
+  #search { width:100%; padding:12px 14px; font-size:1rem; border:1px solid var(--line); border-radius:10px; background:#fff; }
+  .chips { display:flex; gap:8px; overflow-x:auto; padding-bottom:4px; }
+  .chip { flex:none; border:1px solid var(--line); background:#fff; padding:7px 14px; border-radius:999px; cursor:pointer; font-size:.9rem; }
+  .chip[aria-selected="true"] { background:var(--brand); border-color:var(--brand); color:#fff; }
+  .grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; display:flex; flex-direction:column; gap:6px; }
+  .card h3 { margin:0; font-size:1rem; }
+  .card .open { all:unset; cursor:pointer; display:block; }
+  .card .open:focus-visible { outline:2px solid var(--brand); outline-offset:2px; }
+  .muted { color:var(--muted); } .small { font-size:.8rem; margin:0; } .center { text-align:center; }
+  .price-row { display:flex; align-items:baseline; gap:8px; flex-wrap:wrap; margin:8px 0; }
+  .price { font-size:1.15rem; font-weight:700; }
+  .mrp { color:var(--muted); text-decoration:line-through; font-size:.9rem; }
+  .off { background:#e8f5ec; color:var(--ok); font-size:.75rem; font-weight:700; padding:2px 8px; border-radius:999px; }
+  button.primary { width:100%; padding:12px 16px; border:0; border-radius:10px; background:var(--brand); color:#fff; font-size:1rem; font-weight:600; cursor:pointer; }
+  button.primary:hover { background:var(--brand-dark); }
+  button.wa { display:flex; align-items:center; justify-content:center; gap:10px; width:100%; padding:14px 16px; border:0; border-radius:10px; background:var(--wa); color:#05361a; font-size:1.05rem; font-weight:700; cursor:pointer; }
+  button.wa:hover { background:var(--wa-dark); }
+  button.secondary { width:100%; padding:12px; border:1px solid var(--brand); background:#fff; color:var(--brand); border-radius:10px; font-weight:600; cursor:pointer; }
+  button:disabled { opacity:.6; cursor:not-allowed; }
+  .overlay { position:fixed; inset:0; z-index:40; background:rgba(0,0,0,.5); display:grid; place-items:center; padding:16px; }
+  .modal { position:relative; width:100%; max-width:440px; max-height:90vh; overflow:auto; background:#fff; border-radius:14px; padding:22px; }
+  .modal h2 { margin:4px 0 8px; }
+  .close { position:absolute; top:8px; right:12px; background:none; border:0; font-size:1.8rem; line-height:1; cursor:pointer; color:var(--muted); }
+  .qty-row { display:flex; align-items:center; justify-content:space-between; margin:14px 0; gap:12px; }
+  .stepper { display:flex; align-items:center; border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  .stepper button { width:38px; height:38px; border:0; background:#f4efe7; font-size:1.2rem; cursor:pointer; }
+  .stepper input { width:52px; height:38px; border:0; text-align:center; font-size:1rem; -moz-appearance:textfield; }
+  .stepper input::-webkit-outer-spin-button, .stepper input::-webkit-inner-spin-button { -webkit-appearance:none; }
+  .error { color:#b00020; margin:8px 0; font-size:.92rem; }
+  .shade { position:fixed; inset:0; z-index:50; background:rgba(0,0,0,.45); }
+  .drawer { position:fixed; top:0; right:0; bottom:0; z-index:60; width:min(440px,100%); background:#fff; display:flex; flex-direction:column; box-shadow:-8px 0 24px rgba(0,0,0,.2); }
+  .drawer-head { position:relative; padding:16px 20px; border-bottom:1px solid var(--line); }
+  .drawer-head h2 { margin:0; font-size:1.2rem; }
+  .drawer-body { flex:1; overflow:auto; padding:16px 20px 24px; display:flex; flex-direction:column; gap:14px; }
+  .line { border-bottom:1px solid var(--line); padding-bottom:12px; display:grid; gap:6px; }
+  .line-top { display:flex; justify-content:space-between; gap:10px; font-weight:600; }
+  .line-bottom { display:flex; align-items:center; justify-content:space-between; gap:8px; flex-wrap:wrap; }
+  .link { background:none; border:0; color:var(--brand); cursor:pointer; padding:4px; font-size:.9rem; }
+  .summary { background:#faf7f2; border:1px solid var(--line); border-radius:10px; padding:12px 14px; display:grid; gap:6px; }
+  .summary .row { display:flex; justify-content:space-between; gap:10px; }
+  .summary .total { font-size:1.15rem; font-weight:800; border-top:1px dashed var(--line); padding-top:8px; }
+  .field label { display:block; font-weight:600; margin-bottom:6px; }
+  .field input { width:100%; padding:12px 14px; font-size:1rem; border:1px solid var(--line); border-radius:10px; }
+  .field input.invalid { border-color:#b00020; }
+  .empty { text-align:center; padding:32px 8px; display:grid; gap:14px; }
+  .empty p { font-size:1.05rem; margin:0; }
+  @media (max-width:520px) {
+    .brand-name { font-size:.95rem; } .grid { grid-template-columns:1fr 1fr; gap:10px; } .card { padding:10px; } .card h3 { font-size:.92rem; }
+    .overlay { align-items:end; padding:0; } .modal { max-width:none; border-radius:16px 16px 0 0; }
+  }
+  @media (max-width:360px) { .grid { grid-template-columns:1fr; } }
+</style>
+</head>
+<body>
+<header class="topbar">
+  <div class="brand">
+    <span class="brand-mark" aria-hidden="true">M</span>
+    <span class="brand-name">Mahendra Paints <small>and General Stores</small></span>
+  </div>
+  <button id="openCart" class="cart-btn" aria-label="Open cart">
+    <svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M7 18a2 2 0 1 0 0 4 2 2 0 0 0 0-4Zm10 0a2 2 0 1 0 0 4 2 2 0 0 0 0-4ZM1 2v2h2l3.6 7.6-1.4 2.4A2 2 0 0 0 7 17h12v-2H7.4l1.1-2h7.5a2 2 0 0 0 1.7-1l3.6-6.5A1 1 0 0 0 20.4 4H5.2l-.9-2H1Z"/></svg>
+    <span>Cart</span><span id="cartCount" class="badge" hidden>0</span>
+  </button>
+</header>
+
+<main class="container">
+  <section class="tools">
+    <input id="search" type="search" placeholder="Search products" autocomplete="off" aria-label="Search products">
+    <div id="categories" class="chips" role="tablist"></div>
+  </section>
+  <section id="grid" class="grid" aria-live="polite"></section>
+  <p id="noResults" class="muted center" hidden>No products found.</p>
+</main>
+
+<div id="productModal" class="overlay" hidden>
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="pmName">
+    <button class="close" id="pmClose" aria-label="Close">&times;</button>
+    <p id="pmCategory" class="muted small"></p>
+    <h2 id="pmName"></h2>
+    <p id="pmDesc"></p>
+    <p class="muted" id="pmUnit"></p>
+    <div id="pmPrice" class="price-row"></div>
+    <div class="qty-row">
+      <label for="pmQty">Quantity</label>
+      <div class="stepper">
+        <button type="button" id="pmMinus" aria-label="Decrease quantity">&minus;</button>
+        <input id="pmQty" type="number" min="1" max="99" value="1" inputmode="numeric">
+        <button type="button" id="pmPlus" aria-label="Increase quantity">+</button>
+      </div>
+    </div>
+    <p id="pmError" class="error" role="alert" hidden></p>
+    <button id="pmAdd" class="primary">Add to Cart</button>
+  </div>
+</div>
+
+<aside id="cartDrawer" class="drawer" hidden aria-label="Cart">
+  <div class="drawer-head"><h2>Your Cart</h2><button class="close" id="closeCart" aria-label="Close cart">&times;</button></div>
+  <div id="cartBody" class="drawer-body"></div>
+</aside>
+<div id="drawerShade" class="shade" hidden></div>
+
+<script>
+'use strict';
+
+/* ================= CONFIGURATION (edit here only) ================= */
+const CONFIG = {
+  businessName: 'Mahendra Paints and General Stores',
+  whatsappNumber: '918978818513',      // owner's WhatsApp number, international format. The only place it appears.
+  maxQuantity: 99,
+  storageKey: 'mahendra_cart_v1'
+};
+
+/* ================= PRODUCTS (edit this list for your shop) =================
+   price = MRP in rupees, discount = percent off. Final selling price = price - discount. */
+const PRODUCTS = [
+  { id: 1,  category: 'Paints',            name: 'Interior Emulsion White',     unit: '4 L',     price: 1200, discount: 10, description: 'Smooth matt finish for interior walls.' },
+  { id: 2,  category: 'Paints',            name: 'Exterior Weatherproof Paint', unit: '10 L',    price: 3500, discount: 15, description: 'Weather and UV resistant exterior coating.' },
+  { id: 3,  category: 'Paints',            name: 'Wood Primer',                 unit: '1 L',     price: 350,  discount: 0,  description: 'Fast-drying primer for wooden surfaces.' },
+  { id: 4,  category: 'Paints',            name: 'Enamel Paint Black',          unit: '500 ml',  price: 220,  discount: 0,  description: 'Glossy enamel for metal and wood.' },
+  { id: 5,  category: 'Brushes & Rollers', name: 'Paint Brush 2 inch',          unit: '1 pc',    price: 60,   discount: 0,  description: 'Soft bristle brush for walls and doors.' },
+  { id: 6,  category: 'Brushes & Rollers', name: 'Paint Roller 9 inch',         unit: '1 pc',    price: 180,  discount: 5,  description: 'Roller with handle, suitable for large walls.' },
+  { id: 7,  category: 'Hardware',          name: 'Putty Knife',                 unit: '1 pc',    price: 80,   discount: 0,  description: 'Stainless steel scraper for wall preparation.' },
+  { id: 8,  category: 'Hardware',          name: 'Sandpaper 120 Grit',          unit: '1 sheet', price: 15,   discount: 0,  description: 'Waterproof sandpaper sheet.' },
+  { id: 9,  category: 'General Stores',    name: 'Masking Tape 1 inch',         unit: '1 roll',  price: 45,   discount: 0,  description: 'Clean-release masking tape.' },
+  { id: 10, category: 'General Stores',    name: 'Turpentine Oil',              unit: '500 ml',  price: 140,  discount: 0,  description: 'Paint thinner and brush cleaner.' }
+];
+
+/* ================= PRICING (single source of truth) ================= */
+// Final selling price in paise (integers avoid floating point errors).
+const unitPaise = (p) => Math.round(Math.round(p.price * 100) * (100 - p.discount) / 100);
+const rupees = (paise) => '₹' + (paise % 100 === 0 ? String(paise / 100) : (paise / 100).toFixed(2));
+
+/* ================= CART ================= */
+let cart = loadCart();            // [{ id, qty }]
+function loadCart() {
+  try {
+    const raw = JSON.parse(localStorage.getItem(CONFIG.storageKey) || '[]');
+    return Array.isArray(raw) ? raw.filter((l) => PRODUCTS.some((p) => p.id === l.id) && Number.isInteger(l.qty) && l.qty > 0) : [];
+  } catch (e) { return []; }
+}
+function saveCart() { try { localStorage.setItem(CONFIG.storageKey, JSON.stringify(cart)); } catch (e) { /* storage unavailable: cart still works for this visit */ } }
+const clampQty = (n) => Math.min(CONFIG.maxQuantity, Math.max(1, parseInt(n, 10) || 1));
+
+// Cart lines with unit price, subtotal = unit price x quantity, and total = sum of subtotals.
+// Used by BOTH the cart screen and the WhatsApp message, so they can never disagree.
+function cartDetails() {
+  const items = cart.map((l) => {
+    const p = PRODUCTS.find((x) => x.id === l.id);
+    const unit = unitPaise(p);
+    return { id: p.id, name: p.name, quantity: l.qty, unit, subtotal: unit * l.qty };
+  });
+  return { items, count: items.reduce((n, i) => n + i.quantity, 0), total: items.reduce((s, i) => s + i.subtotal, 0) };
+}
+function addToCart(id, qty) {
+  const line = cart.find((l) => l.id === id);
+  if (line) line.qty = Math.min(CONFIG.maxQuantity, line.qty + qty); else cart.push({ id, qty });
+  saveCart();
+}
+function setQty(id, qty) { const l = cart.find((x) => x.id === id); if (l) { l.qty = clampQty(qty); saveCart(); } }
+function removeLine(id) { cart = cart.filter((l) => l.id !== id); saveCart(); }
+
+/* ================= WHATSAPP MESSAGE + URL ================= */
+function buildWhatsAppMessage(customerName, details) {
+  const lines = [`Hello, ${CONFIG.businessName}!`, '', `I am ${customerName}.`, '', 'I would like to order the following products:', ''];
+  for (const it of details.items) {
+    lines.push(it.name, `Quantity: ${it.quantity}`, `Price: ${rupees(it.unit)} each`, `Subtotal: ${rupees(it.subtotal)}`, '');
+  }
+  lines.push(`Total Amount: ${rupees(details.total)}`, '', 'Are these products available?', 'Please let me know as soon as possible.', '', 'Thank you.');
+  return lines.join('\n');
+}
+function buildWhatsAppUrl(message) {
+  return 'https://wa.me/' + CONFIG.whatsappNumber + '?text=' + encodeURIComponent(message);
+}
+const cleanName = (s) => String(s || '').replace(/[\u0000-\u001f\u007f]+/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 60);
+
+/* ================= UI ================= */
+const $ = (id) => document.getElementById(id);
+function el(tag, props = {}, ...kids) {
+  const n = document.createElement(tag);
+  for (const [k, v] of Object.entries(props)) {
+    if (k === 'class') n.className = v;
+    else if (k.startsWith('on')) n.addEventListener(k.slice(2), v);
+    else if (v === true) n.setAttribute(k, '');
+    else if (v !== false && v != null) n.setAttribute(k, v);
+  }
+  for (const kid of kids.flat()) if (kid != null) n.append(kid.nodeType ? kid : document.createTextNode(String(kid)));
+  return n;                                  // text is inserted as text, never as HTML
+}
+const state = { q: '', category: null, current: null, customerName: '' };
+const WA_ICON = '<svg viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path fill="currentColor" d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm5.8 14.1c-.2.7-1.4 1.3-2 1.4-.5.1-1.2.1-1.9-.1-.4-.1-1-.3-1.7-.6-3-1.3-4.9-4.3-5.1-4.5-.1-.2-1.2-1.6-1.2-3s.8-2.1 1-2.4c.3-.3.6-.3.8-.3h.6c.2 0 .4 0 .6.5l.8 2c.1.2.1.3 0 .5l-.3.4-.4.5c-.1.1-.3.3-.1.6.2.3.7 1.2 1.5 1.9 1 .9 1.9 1.2 2.2 1.3.3.1.4.1.6-.1l.8-1c.2-.3.4-.2.6-.1l1.9.9c.3.1.5.2.5.3.1.1.1.6-.1 1.3Z"/></svg>';
+
+function priceBlock(p) {
+  return el('div', { class: 'price-row' },
+    el('span', { class: 'price' }, rupees(unitPaise(p))),
+    p.discount > 0 ? el('span', { class: 'mrp' }, rupees(Math.round(p.price * 100))) : null,
+    p.discount > 0 ? el('span', { class: 'off' }, p.discount + '% off') : null);
+}
+
+function renderCategories() {
+  const cats = [...new Set(PRODUCTS.map((p) => p.category))];
+  const make = (value, label) => el('button', { class: 'chip', role: 'tab', 'aria-selected': String(state.category === value),
+    onclick: () => { state.category = value; renderCategories(); renderProducts(); } }, label);
+  $('categories').replaceChildren(make(null, 'All'), ...cats.map((c) => make(c, c)));
+}
+
+function renderProducts() {
+  const q = state.q.toLowerCase();
+  const list = PRODUCTS.filter((p) => (!state.category || p.category === state.category) &&
+    (!q || (p.name + ' ' + p.description + ' ' + p.category).toLowerCase().includes(q)));
+  $('grid').replaceChildren(...list.map((p) => el('article', { class: 'card' },
+    el('button', { class: 'open', onclick: () => openProduct(p.id), 'aria-label': 'View ' + p.name },
+      el('p', { class: 'muted small' }, p.category), el('h3', {}, p.name), el('p', { class: 'muted small' }, p.unit)),
+    priceBlock(p),
+    el('button', { class: 'primary', onclick: () => openProduct(p.id) }, 'Select Quantity'))));
+  $('noResults').hidden = list.length > 0;
+}
+
+function openProduct(id) {
+  const p = PRODUCTS.find((x) => x.id === id); state.current = p;
+  $('pmCategory').textContent = p.category; $('pmName').textContent = p.name;
+  $('pmDesc').textContent = p.description; $('pmUnit').textContent = 'Pack size: ' + p.unit;
+  $('pmPrice').replaceChildren(...priceBlock(p).childNodes);
+  $('pmQty').value = 1; $('pmError').hidden = true; $('productModal').hidden = false;
+}
+const closeProduct = () => { $('productModal').hidden = true; };
+const pmQty = () => clampQty($('pmQty').value);
+
+function renderBadge() { const c = cartDetails().count; $('cartCount').textContent = c; $('cartCount').hidden = c === 0; }
+function openCart() { renderCart(); $('cartDrawer').hidden = false; $('drawerShade').hidden = false; }
+function closeCart() { $('cartDrawer').hidden = true; $('drawerShade').hidden = true; }
+
+function renderCart() {
+  renderBadge();
+  const body = $('cartBody'); body.replaceChildren();
+  const d = cartDetails();
+  if (!d.items.length) {
+    body.append(el('div', { class: 'empty' }, el('p', {}, 'Your cart is empty.'), el('button', { class: 'primary', onclick: closeCart }, 'Continue Shopping')));
+    return;
+  }
+  for (const it of d.items) {
+    body.append(el('div', { class: 'line' },
+      el('div', { class: 'line-top' }, el('span', {}, it.name), el('span', {}, rupees(it.subtotal))),
+      el('div', { class: 'muted small' }, rupees(it.unit) + ' each'),
+      el('div', { class: 'line-bottom' },
+        el('div', { class: 'stepper' },
+          el('button', { type: 'button', 'aria-label': 'Decrease quantity of ' + it.name, onclick: () => { it.quantity <= 1 ? removeLine(it.id) : setQty(it.id, it.quantity - 1); renderCart(); } }, '−'),
+          el('input', { type: 'number', min: 1, max: CONFIG.maxQuantity, value: it.quantity, 'aria-label': 'Quantity of ' + it.name, onchange: (e) => { setQty(it.id, e.target.value); renderCart(); } }),
+          el('button', { type: 'button', 'aria-label': 'Increase quantity of ' + it.name, onclick: () => { setQty(it.id, it.quantity + 1); renderCart(); } }, '+')),
+        el('button', { class: 'link', onclick: () => { removeLine(it.id); renderCart(); } }, 'Remove'))));
+  }
+  body.append(el('div', { class: 'summary', 'aria-label': 'Order summary' },
+    ...d.items.map((it) => el('div', { class: 'row' }, el('span', {}, it.name + ' × ' + it.quantity), el('span', {}, rupees(it.subtotal)))),
+    el('div', { class: 'row total' }, el('span', {}, 'Total Amount'), el('span', { id: 'orderTotal' }, rupees(d.total)))));
+
+  const nameInput = el('input', { id: 'customerName', type: 'text', placeholder: 'Enter your name', maxlength: 60, autocomplete: 'name', value: state.customerName,
+    oninput: (e) => { state.customerName = e.target.value; e.target.classList.remove('invalid'); $('nameError').hidden = true; } });
+  const waBtn = el('button', { id: 'waBtn', class: 'wa', onclick: placeOrder }, 'Place Order on WhatsApp');
+  waBtn.insertAdjacentHTML('afterbegin', WA_ICON);
+  body.append(el('div', { class: 'field' }, el('label', { for: 'customerName' }, 'Your name'), nameInput, el('p', { id: 'nameError', class: 'error', role: 'alert', hidden: true })),
+    waBtn, el('button', { class: 'secondary', onclick: closeCart }, 'Continue Shopping'));
+}
+
+function placeOrder() {
+  const details = cartDetails();
+  if (!details.items.length) { renderCart(); return; }           // empty cart: show "Your cart is empty." and stop
+  const name = cleanName($('customerName') && $('customerName').value);
+  if (!name) {                                                   // name is required
+    $('nameError').textContent = 'Please enter your name to continue.'; $('nameError').hidden = false;
+    $('customerName').classList.add('invalid'); $('customerName').focus(); return;
+  }
+  const message = buildWhatsAppMessage(name, details);           // 3-4. total + message
+  const url = buildWhatsAppUrl(message);                         // 5. URL-encode
+  // 6. Open WhatsApp with the message pre-filled. The customer reviews it and presses Send.
+  const win = window.open(url, '_blank', 'noopener');
+  if (!win) window.location.href = url;                          // popup blocked (some mobile browsers): same tab
+  // 7. Cart is intentionally kept.
+}
+
+/* ================= WIRING ================= */
+$('search').addEventListener('input', (e) => { state.q = e.target.value.trim(); renderProducts(); });
+$('openCart').addEventListener('click', openCart);
+$('drawerShade').addEventListener('click', closeCart);
+$('closeCart').addEventListener('click', closeCart);
+$('pmClose').addEventListener('click', closeProduct);
+$('productModal').addEventListener('click', (e) => { if (e.target === $('productModal')) closeProduct(); });
+$('pmMinus').addEventListener('click', () => { $('pmQty').value = Math.max(1, pmQty() - 1); });
+$('pmPlus').addEventListener('click', () => { $('pmQty').value = Math.min(CONFIG.maxQuantity, pmQty() + 1); });
+$('pmAdd').addEventListener('click', () => { addToCart(state.current.id, pmQty()); closeProduct(); openCart(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { closeProduct(); closeCart(); } });
+
+renderCategories(); renderProducts(); renderBadge();
+</script>
+</body>
+</html>
